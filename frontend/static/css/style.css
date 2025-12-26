@@ -1,0 +1,119 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+h3 {
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+/* login styles */
+
+
+
+
+
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+.navbar-brand {
+    font-size: 1.3rem;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+h6 {
+    font-weight: 600;
+}
+
+.badge {
+    font-size: 0.85rem;
+}
+
+/* -------- USER Dashboard -------- *
+
+
+
+
+
+
+
+/* =========================
+   GLOBAL STYLES
+========================= */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar-brand {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+/* =========================
+   HEADINGS
+========================= */
+
+h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.card {
+    border-radius: 10px;
+}
+
+.dashboard-card i {
+    font-size: 2rem;
+}
+
+.dashboard-card h4 {
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* =========================
+   TASK LIST
+========================= */
+
+.task-card {
+    transition: 0.2s ease-in-out;
+}
+
+.task-card:hover {
+    background-color: #f1f3f5;
+}
+
+/* =========================
+   BADGES & BUTTONS
+========================= */
+
+.badge {
+    font-size: 0.85rem;
+}
+
+.btn {
+    border-radius: 6px;
+}
+
+
+
+
+/* -------- manager_dashboard -------- *

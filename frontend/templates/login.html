@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | TeamFlow</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../Static/css/style.css">
+</head>
+<body class="bg-light">
+
+    <div class="container">
+        <div class="row justify-content-center align-items-center vh-100">
+            <div class="col-md-4">
+
+                <div class="card shadow">
+                    <div class="card-body">
+
+                        <h3 class="text-center mb-4">TeamFlow</h3>
+                        <p class="text-center text-muted mb-4">
+                            Task & Workflow Management
+                        </p>
+
+                        <form method="post">
+                            <!-- Django CSRF will be added later -->
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" placeholder="Enter username" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" placeholder="Enter password" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                Login
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+
+                <p class="text-center text-muted mt-3" style="font-size: 13px;">
+                    Internal system • Authorized users only
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="../Static/js/script.js"></script>
+
+</body>
+</html>
