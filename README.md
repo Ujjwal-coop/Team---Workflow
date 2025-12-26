@@ -1,13 +1,13 @@
 # TeamFlow – Task & Workflow Management System
 
-TeamFlow is a role-based task and workflow management web application designed to simulate real-world team operations in organizations.
+TeamFlow is a role-based task and workflow management system designed to simulate real-world team operations.
 
 ## Features
 - Role-based access (Admin, Manager, User)
 - Task assignment and tracking
-- Task status updates (To Do, In Progress, Review, Completed)
+- Task status updates
 - User and Manager dashboards
-- Clean and simple UI
+- Clean and responsive UI
 
 ## Tech Stack
 - Frontend: HTML, CSS, Bootstrap, JavaScript (Django Templates)
@@ -15,19 +15,15 @@ TeamFlow is a role-based task and workflow management web application designed t
 - Database: MySQL
 
 ## Project Structure
-- Frontend UI built using Django templates
-- Backend handles authentication, roles, and data storage
-- Admin operations managed via Django Admin Panel
+- frontend/ → UI using Django templates
+- backend/ → Django backend (in progress)
 
-## Team Members & Roles
-- **Ujjwal** – Team Lead & Backend (Django)
-- **Omnath** – Frontend & Application Flow (UI, UX, JS)
-- **Akanksha** – Backend Support & Documentation (MySQL)
-- **Pooja** – Testing & Demo Preparation
+## Team Members
+- Ujjwal – Team Lead & Backend
+- Omnath – Frontend & Application Flow
+- Akanksha – Backend Support & Documentation
+- Pooja – Testing & Demo
 
 ## Project Status
 - Frontend UI: Completed
 - Backend Integration: In Progress
-
-## Use Case
-This system can be used in companies, colleges, or teams to manage tasks and workflows efficiently.
