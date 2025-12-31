@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.urls import path
 from core import views
+from . import views
 
 urlpatterns = [
     path('', views.login_view, name='login'),
@@ -23,4 +24,7 @@ urlpatterns = [
     path('manager/', views.manager_dashboard, name='manager_dashboard'),
     path('tasks/', views.task_list, name='task_list'),
     path('logout/', views.logout_view, name='logout'),
+    path('task/<int:task_id>/update/', views.task_update, name='task_update'),
+    path('manager/create-task/', views.create_task, name='create_task'),
+    path('tasks/update/<int:task_id>/', views.task_update, name='task_update'),
 ]
