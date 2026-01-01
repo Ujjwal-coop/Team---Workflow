@@ -13,48 +13,87 @@
 </head>
 
 <body class="bg-light">
-    <div class="container">
-        <div class="row justify-content-center align-items-center vh-100">
-            <div class="col-md-4">
 
-                <div class="card shadow">
-                    <div class="card-body">
+<div class="container">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-md-4">
 
-                        <h3 class="text-center mb-4">TeamFlow</h3>
-                        <p class="text-center text-muted mb-4">
-                            Task & Workflow Management
-                        </p>
+            <div class="card shadow">
+                <div class="card-body">
 
-                        <form method="post">
-                            {% csrf_token %}
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Username</label>
-                                <input type="text" name="username" class="form-control" placeholder="Enter username" required>
+                    <h3 class="text-center mb-1 fw-bold">TeamFlow</h3>
+                    <p class="text-center text-muted mb-4">
+                        Multi-Company Task Management System
+                    </p>
+
+                    <!-- Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger py-2">
+                                {{ message }}
                             </div>
+                        {% endfor %}
+                    {% endif %}
 
-                            <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control" placeholder="Enter password" required>
-                            </div>
+                    <!-- LOGIN FORM -->
+                    <form method="post">
+                        {% csrf_token %}
 
-                            <button type="submit" class="btn btn-primary w-100">
-                                Login
-                            </button>
-                        </form>
+                        <!-- USERNAME -->
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input
+                                type="text"
+                                name="username"
+                                class="form-control"
+                                placeholder="Enter username"
+                                required
+                            >
+                        </div>
 
-                    </div>
+                        <!-- PASSWORD -->
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input
+                                type="password"
+                                name="password"
+                                class="form-control"
+                                placeholder="Enter password"
+                                required
+                            >
+                        </div>
+
+                        <!-- MANAGER SELECTION (For Employees) -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Select Manager <small class="text-muted">(Employees only)</small>
+                            </label>
+                            <select name="manager" class="form-select">
+                                <option value="">-- Select Manager --</option>
+                                {% for manager in managers %}
+                                    <option value="{{ manager.id }}">
+                                        {{ manager.user.username }} — {{ manager.company_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- SUBMIT -->
+                        <button type="submit" class="btn btn-primary w-100">
+                            Login
+                        </button>
+                    </form>
+
                 </div>
-
-                <p class="text-center text-muted mt-3" style="font-size: 13px;">
-                    Internal system • Authorized users only
-                </p>
-
             </div>
+
+            <p class="text-center text-muted mt-3" style="font-size: 13px;">
+                Admin • Manager • Employee access only
+            </p>
+
         </div>
     </div>
+</div>
 
-    <!-- JS -->
-    <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>
