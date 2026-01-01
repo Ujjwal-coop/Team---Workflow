@@ -4,39 +4,76 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 
-from .models import Task
+from .models import Task, ManagerProfile, EmployeeProfile
 from .forms import TaskCreateForm, TaskUpdateForm
 
 
 # =========================
-# LOGIN
+# LOGIN VIEW
 # =========================
 def login_view(request):
+    managers = ManagerProfile.objects.all()
+
     if request.method == "POST":
-        user = authenticate(
-            request,
-            username=request.POST.get("username"),
-            password=request.POST.get("password")
-        )
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        manager_id = request.POST.get("manager")
 
-        if user:
-            login(request, user)
-            return redirect('manager_dashboard' if user.is_staff else 'dashboard')
+        user = authenticate(request, username=username, password=password)
 
-        messages.error(request, "Invalid username or password")
+        if user is None:
+            messages.error(request, "Invalid username or password")
+            return render(request, 'login.html', {'managers': managers})
 
-    return render(request, 'login.html')
+        login(request, user)
+
+        # ADMIN
+        if user.is_superuser:
+            return redirect('/admin/')
+
+        # MANAGER
+        if hasattr(user, 'managerprofile'):
+            return redirect('manager_dashboard')
+
+        # EMPLOYEE
+        if hasattr(user, 'employeeprofile'):
+            if not manager_id:
+                messages.error(request, "Please select your manager")
+                logout(request)
+                return render(request, 'login.html', {'managers': managers})
+
+            if int(manager_id) != user.employeeprofile.manager.id:
+                messages.error(request, "Incorrect manager selected")
+                logout(request)
+                return render(request, 'login.html', {'managers': managers})
+
+            return redirect('dashboard')
+
+        messages.error(request, "Unauthorized account")
+        logout(request)
+
+    return render(request, 'login.html', {'managers': managers})
 
 
 # =========================
-# USER DASHBOARD
+# LOGOUT
+# =========================
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+
+# =========================
+# EMPLOYEE DASHBOARD
 # =========================
 @login_required
 def dashboard(request):
-    tasks = Task.objects.filter(assigned_to=request.user)
+    employee = request.user.employeeprofile
+    tasks = employee.tasks.all()
 
     return render(request, 'dashboard.html', {
-        'tasks': tasks[:5],  # recent tasks
+        'tasks': tasks,
         'total': tasks.count(),
         'pending': tasks.exclude(status='completed').count(),
         'completed': tasks.filter(status='completed').count(),
@@ -44,27 +81,30 @@ def dashboard(request):
 
 
 # =========================
-# USER TASK LIST
+# EMPLOYEE TASK LIST
 # =========================
 @login_required
 def task_list(request):
-    tasks = Task.objects.filter(assigned_to=request.user)
+    employee = request.user.employeeprofile
+    tasks = employee.tasks.all()
+
     return render(request, 'task_list.html', {'tasks': tasks})
 
 
 # =========================
-# UPDATE TASK STATUS (USER)
+# EMPLOYEE TASK UPDATE
 # =========================
 @login_required
 def task_update(request, task_id):
-    task = get_object_or_404(Task, id=task_id, assigned_to=request.user)
+    employee = request.user.employeeprofile
+    task = get_object_or_404(Task, id=task_id, employee=employee)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = TaskUpdateForm(request.POST, instance=task)
         if form.is_valid():
             form.save()
-            messages.success(request, "Task status updated successfully")
-            return redirect('task_list')
+            messages.success(request, "Task updated successfully")
+            return redirect('dashboard')
     else:
         form = TaskUpdateForm(instance=task)
 
@@ -79,10 +119,12 @@ def task_update(request, task_id):
 # =========================
 @staff_member_required
 def manager_dashboard(request):
-    tasks = Task.objects.all()
+    manager = request.user.managerprofile
+    tasks = manager.tasks.all()
 
     return render(request, 'manager_dashboard.html', {
         'tasks': tasks,
+        'employees_count': manager.employees.count(),
         'total': tasks.count(),
         'pending': tasks.exclude(status='completed').count(),
         'completed': tasks.filter(status='completed').count(),
@@ -90,26 +132,21 @@ def manager_dashboard(request):
 
 
 # =========================
-# CREATE TASK (MANAGER)
+# MANAGER CREATE TASK
 # =========================
 @staff_member_required
 def create_task(request):
-    if request.method == 'POST':
-        form = TaskCreateForm(request.POST)
+    manager = request.user.managerprofile
+
+    if request.method == "POST":
+        form = TaskCreateForm(request.POST, manager=manager)
         if form.is_valid():
-            form.save()
+            task = form.save(commit=False)
+            task.manager = manager
+            task.save()
             messages.success(request, "Task created successfully")
             return redirect('manager_dashboard')
     else:
-        form = TaskCreateForm()
+        form = TaskCreateForm(manager=manager)
 
     return render(request, 'create_task.html', {'form': form})
-
-
-# =========================
-# LOGOUT
-# =========================
-@login_required
-def logout_view(request):
-    logout(request)
-    return redirect('login')

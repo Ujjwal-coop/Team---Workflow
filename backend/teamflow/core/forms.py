@@ -1,50 +1,38 @@
 from django import forms
-from django.contrib.auth.models import User
-from .models import Task
+from .models import Task, EmployeeProfile
 
 
 # =========================
-# MANAGER: CREATE TASK FORM
+# MANAGER: CREATE TASK
 # =========================
 class TaskCreateForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'assigned_to', 'deadline']
+        fields = ['title', 'description', 'employee', 'deadline']
         widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter task title'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Task description'
-            }),
-            'assigned_to': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'deadline': forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'form-control'
-            }),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+            'employee': forms.Select(attrs={'class': 'form-select'}),
+            'deadline': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
+        manager = kwargs.pop('manager')
         super().__init__(*args, **kwargs)
 
-        # Show only normal users (exclude staff/admin)
-        self.fields['assigned_to'].queryset = User.objects.filter(is_staff=False)
+        # Only employees under this manager
+        self.fields['employee'].queryset = EmployeeProfile.objects.filter(
+            manager=manager
+        )
 
 
 # =========================
-# USER: UPDATE TASK STATUS
+# EMPLOYEE: UPDATE TASK
 # =========================
 class TaskUpdateForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['status']
         widgets = {
-            'status': forms.Select(attrs={
-                'class': 'form-select'
-            })
+            'status': forms.Select(attrs={'class': 'form-select'})
         }
