@@ -27,3 +27,17 @@ Employees can update task status, and dashboards show real-time progress.
 2. Run migrations
 3. Start server using `python manage.py runserver`
 4. Open browser and login
+
+## Demo Credentials (Local Testing)
+
+Admin:
+- Username: ujjwa
+- Password: ujjwal@123
+
+Manager:
+- Username: Akansha
+- Password: Happy@123
+
+Employee:
+- Username: pooja
+- Password: mhaske@123
