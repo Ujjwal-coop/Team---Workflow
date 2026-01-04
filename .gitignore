@@ -1,16 +1,16 @@
 # Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 *.pyd
-*.sqlite3
 
 # Django
+*.sqlite3
 db.sqlite3
 media/
 staticfiles/
 
-# Virtual environment
+# Environment
+.env
 venv/
 env/
 
@@ -20,9 +20,3 @@ env/
 # OS
 .DS_Store
 Thumbs.db
-
-
-*.sqlite3
-__pycache__/
-.env
-
