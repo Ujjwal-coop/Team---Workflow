@@ -4,47 +4,38 @@
     <meta charset="UTF-8">
     <title>Update Task | TeamFlow</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Common CSS -->
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body class="bg-light">
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">TeamFlow</a>
-        <a href="task_list.html" class="btn btn-outline-light btn-sm">Back</a>
-    </div>
+<nav class="navbar navbar-dark bg-primary px-3">
+    <span class="navbar-brand">TeamFlow</span>
+    <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm">Back</a>
 </nav>
 
-<div class="container mt-4">
-
-    <!-- CARD -->
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-5">
             <div class="card shadow-sm">
                 <div class="card-body">
 
                     <h5 class="mb-3">Update Task Status</h5>
 
-                    <p><strong>Task:</strong> Design Dashboard UI</p>
-                    <p class="text-muted">Deadline: 28 Dec 2025</p>
+                    <p><strong>{{ task.title }}</strong></p>
+                    <p class="text-muted">Deadline: {{ task.deadline }}</p>
 
-                    <form method="post" class="task-update-form">
-
-                        <!-- Django CSRF later -->
+                    <form method="post">
+                        {% csrf_token %}
 
                         <div class="mb-3">
-                            <label class="form-label">Task Status</label>
-                            <select class="form-select" required>
-                                <option value="">Select status</option>
-                                <option>To Do</option>
-                                <option>In Progress</option>
-                                <option>Review</option>
-                                <option>Completed</option>
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select" required>
+                                <option value="todo" {% if task.status == 'todo' %}selected{% endif %}>To Do</option>
+                                <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                <option value="review" {% if task.status == 'review' %}selected{% endif %}>Review</option>
+                                <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
                             </select>
                         </div>
 
@@ -57,7 +48,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 </body>
