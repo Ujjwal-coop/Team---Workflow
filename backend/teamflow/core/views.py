@@ -167,3 +167,19 @@ def create_task(request):
         form = TaskCreateForm(manager=manager)
 
     return render(request, "create_task.html", {"form": form})
+
+
+# =========================
+# MANAGER DELETE TASK
+# =========================
+@staff_member_required
+def delete_task(request, task_id):
+    task = get_object_or_404(
+        Task,
+        id=task_id,
+        manager=request.user.managerprofile
+    )
+    if task.status == 'completed':
+        task.delete()
+    return redirect('manager_dashboard')
+
