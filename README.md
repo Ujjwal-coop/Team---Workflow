@@ -31,7 +31,7 @@ Employees can update task status, and dashboards show real-time progress.
 ## Demo Credentials (Local Testing)
 
 Admin:
-- Username: ujjwa
+- Username: ujjwal
 - Password: ujjwal@123
 
 Manager:
