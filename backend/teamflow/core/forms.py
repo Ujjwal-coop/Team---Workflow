@@ -1,3 +1,5 @@
+# core/forms.py
+
 from django import forms
 from django.contrib.auth.models import User
 from .models import Task, EmployeeProfile, ManagerProfile
@@ -34,6 +36,7 @@ class SignUpForm(forms.ModelForm):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={"class": "form-control"})
     )
+
     role = forms.ChoiceField(
         choices=[
             ("manager", "Manager"),
@@ -41,6 +44,7 @@ class SignUpForm(forms.ModelForm):
         ],
         widget=forms.HiddenInput()
     )
+
     manager = forms.ModelChoiceField(
         queryset=ManagerProfile.objects.all(),
         required=False,
@@ -70,18 +74,44 @@ class SignUpForm(forms.ModelForm):
 
 
 # =========================
-# TASK CREATE FORM
+# TASK CREATE FORM (FIXED)
 # =========================
 class TaskCreateForm(forms.ModelForm):
+
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            "class": "form-control",
+            "rows": 4,
+            "placeholder": "Write instructions or message for employee..."
+        })
+    )
+
+    deadline = forms.DateField(
+        widget=forms.DateInput(attrs={
+            "type": "date",
+            "class": "form-control"
+        })
+    )
+
     class Meta:
         model = Task
-        fields = ["title", "employee", "deadline"]
+        fields = ["title", "description", "employee", "deadline"]
+
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Task title"
+            }),
+            "employee": forms.Select(attrs={
+                "class": "form-select"
+            }),
+        }
 
     def __init__(self, *args, **kwargs):
         manager = kwargs.pop("manager", None)
         super().__init__(*args, **kwargs)
 
-        # Restrict employees to the manager's own employees
         if manager:
             self.fields["employee"].queryset = EmployeeProfile.objects.filter(
                 manager=manager
