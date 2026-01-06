@@ -4,12 +4,12 @@ from .models import Task, ManagerProfile, EmployeeProfile
 
 @admin.register(ManagerProfile)
 class ManagerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'company_name')
-
+    list_display = ("user", "company_name")
 
 @admin.register(EmployeeProfile)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('user', 'manager')
+    list_display = ("user", "manager")
+
 
 
 @admin.register(Task)
