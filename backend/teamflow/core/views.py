@@ -8,10 +8,13 @@ from .models import Task, ManagerProfile, EmployeeProfile
 from .forms import LoginForm, SignUpForm, TaskCreateForm
 
 
-# ---------------- LOGIN ----------------
+# ======================================================
+# LOGIN
+# ======================================================
 @csrf_protect
 def login_view(request):
     form = LoginForm(request.POST or None)
+    managers = ManagerProfile.objects.all()
 
     if request.method == "POST" and form.is_valid():
         username = form.cleaned_data["username"]
@@ -20,112 +23,191 @@ def login_view(request):
 
         user = authenticate(request, username=username, password=password)
         if not user:
-            return render(request, "login.html", {"form": form, "error": "Invalid credentials"})
+            return render(
+                request,
+                "login.html",
+                {"form": form, "error": "Invalid credentials", "managers": managers},
+            )
 
-        # ADMIN / MANAGER
-        if role == "admin":
-            if user.is_superuser or ManagerProfile.objects.filter(user=user).exists():
-                login(request, user)
-                if user.is_superuser:
-                    return redirect("admin_dashboard")
-                return redirect("manager_dashboard")
-            return render(request, "login.html", {"form": form, "error": "Not admin/manager"})
+        # -------- ADMIN --------
+        if role == "admin" and user.is_superuser:
+            login(request, user)
+            return redirect("admin_dashboard")
 
-        # EMPLOYEE
-        if role == "employee":
-            if EmployeeProfile.objects.filter(user=user).exists():
-                login(request, user)
-                return redirect("dashboard")
-            return render(request, "login.html", {"form": form, "error": "Not employee"})
+        # -------- MANAGER --------
+        if role == "admin" and ManagerProfile.objects.filter(user=user).exists():
+            login(request, user)
+            return redirect("manager_dashboard")
 
-    return render(request, "login.html", {"form": form})
+        # -------- EMPLOYEE --------
+        if role == "employee" and EmployeeProfile.objects.filter(user=user).exists():
+            login(request, user)
+            return redirect("dashboard")
+
+        return render(
+            request,
+            "login.html",
+            {"form": form, "error": "Unauthorized role", "managers": managers},
+        )
+
+    return render(request, "login.html", {"form": form, "managers": managers})
 
 
-# ---------------- SIGNUP ----------------
+# ======================================================
+# SIGNUP
+# ======================================================
 @csrf_protect
 def signup_view(request):
     form = SignUpForm(request.POST or None)
+    managers = ManagerProfile.objects.all()
 
     if request.method == "POST" and form.is_valid():
         user = form.save()
-        EmployeeProfile.objects.create(user=user)
+        role = form.cleaned_data["role"]
+
+        # -------- MANAGER SIGNUP --------
+        if role == "manager":
+            ManagerProfile.objects.create(
+                user=user,
+                company_name=user.username
+            )
+
+        # -------- EMPLOYEE SIGNUP --------
+        else:
+            manager = form.cleaned_data["manager"]
+            EmployeeProfile.objects.create(
+                user=user,
+                manager=manager
+            )
+
         return redirect("login")
 
-    return render(request, "signup.html", {"form": form})
+    return render(request, "signup.html", {"form": form, "managers": managers})
 
 
-# ---------------- LOGOUT ----------------
+# ======================================================
+# LOGOUT
+# ======================================================
+@login_required
 def logout_view(request):
     logout(request)
     return redirect("login")
 
 
-# ---------------- EMPLOYEE DASHBOARD ----------------
+# ======================================================
+# EMPLOYEE DASHBOARD
+# ======================================================
 @login_required
 def dashboard(request):
     employee = get_object_or_404(EmployeeProfile, user=request.user)
-    tasks = Task.objects.filter(employee=employee)
+    tasks = employee.tasks.all()
 
-    return render(request, "dashboard.html", {
-        "tasks": tasks,
-        "total": tasks.count(),
-        "pending": tasks.filter(status="pending").count(),
-        "completed": tasks.filter(status="completed").count(),
-    })
+    return render(
+        request,
+        "dashboard.html",
+        {
+            "tasks": tasks,
+            "total": tasks.count(),
+            "pending": tasks.exclude(status="completed").count(),
+            "completed": tasks.filter(status="completed").count(),
+        },
+    )
 
 
-# ---------------- MANAGER DASHBOARD ----------------
+# ======================================================
+# MANAGER DASHBOARD
+# ======================================================
 @login_required
 def manager_dashboard(request):
-    if not (request.user.is_superuser or ManagerProfile.objects.filter(user=request.user).exists()):
-        return redirect("login")
+    manager = get_object_or_404(ManagerProfile, user=request.user)
+    tasks = manager.tasks.all()
 
-    tasks = Task.objects.all()
+    return render(
+        request,
+        "manager_dashboard.html",
+        {
+            "tasks": tasks,
+            "employees_count": manager.employees.count(),
+            "total": tasks.count(),
+            "pending": tasks.exclude(status="completed").count(),
+            "completed": tasks.filter(status="completed").count(),
+        },
+    )
 
-    return render(request, "manager_dashboard.html", {
-        "tasks": tasks,
-        "employees_count": EmployeeProfile.objects.count(),
-        "total": tasks.count(),
-        "pending": tasks.filter(status="pending").count(),
-        "completed": tasks.filter(status="completed").count(),
-    })
 
-
-# ---------------- CREATE TASK ----------------
+# ======================================================
+# CREATE TASK (MANAGER ONLY)
+# ======================================================
 @login_required
 @csrf_protect
 def create_task(request):
-    if not (request.user.is_superuser or ManagerProfile.objects.filter(user=request.user).exists()):
-        return redirect("login")
+    manager = get_object_or_404(ManagerProfile, user=request.user)
 
-    form = TaskCreateForm(request.POST or None)
+    form = TaskCreateForm(request.POST or None, manager=manager)
+
     if request.method == "POST" and form.is_valid():
-        form.save()
+        task = form.save(commit=False)
+        task.manager = manager
+        task.save()
         return redirect("manager_dashboard")
 
     return render(request, "create_task.html", {"form": form})
 
 
-# ---------------- DELETE TASK ----------------
+# ======================================================
+# TASK UPDATE (EMPLOYEE ONLY)  ✅ FIXED
+# ======================================================
+@login_required
+def task_update(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+
+    # Only employee can update their own task
+    if not hasattr(request.user, "employee_profile"):
+        return redirect("login")
+
+    if task.employee.user != request.user:
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        task.status = request.POST.get("status")
+        task.save()
+        return redirect("dashboard")
+
+    return render(request, "task_update.html", {"task": task})
+
+
+# ======================================================
+# DELETE TASK (MANAGER / ADMIN)
+# ======================================================
 @login_required
 def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
 
-    if not (request.user.is_superuser or ManagerProfile.objects.filter(user=request.user).exists()):
-        return redirect("login")
+    # Admin override
+    if request.user.is_superuser:
+        task.delete()
+        return redirect("manager_dashboard")
 
-    if task.status == "completed":
+    manager = get_object_or_404(ManagerProfile, user=request.user)
+
+    if task.manager == manager and task.status == "completed":
         task.delete()
 
     return redirect("manager_dashboard")
 
 
-# ---------------- ADMIN DASHBOARD ----------------
+# ======================================================
+# ADMIN DASHBOARD
+# ======================================================
 @user_passes_test(lambda u: u.is_superuser)
 def admin_dashboard(request):
-    return render(request, "admin_dashboard.html", {
-        "users": User.objects.count(),
-        "managers": ManagerProfile.objects.count(),
-        "employees": EmployeeProfile.objects.count(),
-        "tasks": Task.objects.count(),
-    })
+    return render(
+        request,
+        "admin_dashboard.html",
+        {
+            "users": User.objects.count(),
+            "managers": ManagerProfile.objects.count(),
+            "employees": EmployeeProfile.objects.count(),
+            "tasks": Task.objects.count(),
+        },
+    )
