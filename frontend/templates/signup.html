@@ -1,50 +1,104 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Signup | TeamFlow</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Signup | TeamFlow</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
 <div class="container vh-100 d-flex justify-content-center align-items-center">
-<div class="card p-4" style="width:380px">
+    <div class="card p-4 shadow" style="width: 380px;">
 
-<h4 class="text-center">Create Account</h4>
+        <h4 class="text-center mb-3">Create Account</h4>
 
-<form method="post">
-{% csrf_token %}
+        <form method="post">
+            {% csrf_token %}
 
-<input type="hidden" name="role" id="role">
+            <!-- ROLE (HIDDEN) -->
+            <input type="hidden" name="role" id="role">
 
-<button type="button" class="btn btn-outline-primary w-100 mb-2"
-onclick="setRole('employee')">Employee</button>
+            <!-- ROLE SELECTION -->
+            <button type="button"
+                    class="btn btn-outline-primary w-100 mb-2"
+                    id="employeeBtn"
+                    onclick="setRole('employee')">
+                Employee
+            </button>
 
-<button type="button" class="btn btn-outline-secondary w-100 mb-3"
-onclick="setRole('manager')">Manager</button>
+            <button type="button"
+                    class="btn btn-outline-secondary w-100 mb-3"
+                    id="managerBtn"
+                    onclick="setRole('manager')">
+                Manager
+            </button>
 
-<input name="username" class="form-control mb-2" placeholder="Username" required>
-<input name="password" type="password" class="form-control mb-2" placeholder="Password" required>
+            <!-- USERNAME -->
+            <input type="text"
+                   name="username"
+                   class="form-control mb-2"
+                   placeholder="Username"
+                   required>
 
-<div id="managerBox">
-<select name="manager" class="form-select mb-2">
-<option value="">Select Manager</option>
-{% for m in managers %}
-<option value="{{ m.id }}">{{ m.company_name }} — {{ m.user.username }}</option>
-{% endfor %}
-</select>
+            <!-- PASSWORD -->
+            <input type="password"
+                   name="password"
+                   class="form-control mb-3"
+                   placeholder="Password"
+                   required>
+
+            <!-- MANAGER SELECTION (EMPLOYEE ONLY) -->
+            <div id="managerBox" class="mb-3">
+                <label class="form-label">Select Manager</label>
+                <select name="manager" class="form-select">
+                    <option value="">-- Select Manager --</option>
+                    {% for m in managers %}
+                        <option value="{{ m.id }}">
+                            {{ m.company_name }} — {{ m.user.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- SUBMIT -->
+            <button class="btn btn-success w-100">
+                Sign Up
+            </button>
+
+            <!-- LOGIN LINK -->
+            <p class="text-center mt-3 mb-0">
+                <a href="{% url 'login' %}">Already have an account? Login</a>
+            </p>
+
+        </form>
+    </div>
 </div>
 
-<button class="btn btn-success w-100">Sign Up</button>
-</form>
-</div>
-</div>
-
+<!-- ROLE TOGGLE SCRIPT -->
 <script>
-function setRole(r){
-document.getElementById("role").value = r;
-document.getElementById("managerBox").style.display = r === "employee" ? "block" : "none";
+function setRole(role) {
+    document.getElementById("role").value = role;
+
+    const managerBox = document.getElementById("managerBox");
+    const empBtn = document.getElementById("employeeBtn");
+    const mgrBtn = document.getElementById("managerBtn");
+
+    empBtn.classList.remove("active");
+    mgrBtn.classList.remove("active");
+
+    if (role === "employee") {
+        managerBox.style.display = "block";
+        empBtn.classList.add("active");
+    } else {
+        managerBox.style.display = "none";
+        mgrBtn.classList.add("active");
+    }
 }
+
+// DEFAULT ROLE
 setRole("employee");
 </script>
 
