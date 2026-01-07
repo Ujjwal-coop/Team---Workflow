@@ -20,6 +20,7 @@ def login_view(request):
         username = form.cleaned_data["username"]
         password = form.cleaned_data["password"]
         role = form.cleaned_data["role"]
+        selected_manager = form.cleaned_data.get("manager")
 
         user = authenticate(request, username=username, password=password)
         if not user:
@@ -40,14 +41,56 @@ def login_view(request):
             return redirect("manager_dashboard")
 
         # -------- EMPLOYEE --------
-        if role == "employee" and EmployeeProfile.objects.filter(user=user).exists():
+         # ================= EMPLOYEE =================
+        if role == "employee":
+            try:
+                employee = EmployeeProfile.objects.get(user=user)
+            except EmployeeProfile.DoesNotExist:
+                return render(
+                    request,
+                    "login.html",
+                    {
+                        "form": form,
+                        "error": "You are not registered as an employee",
+                        "managers": managers,
+                    },
+                )
+
+            # 🔐 CRITICAL CHECK: Manager must match
+            if not selected_manager:
+                return render(
+                    request,
+                    "login.html",
+                    {
+                        "form": form,
+                        "error": "Please select your manager",
+                        "managers": managers,
+                    },
+                )
+
+            if employee.manager.id != selected_manager.id:
+                return render(
+                    request,
+                    "login.html",
+                    {
+                        "form": form,
+                        "error": "Incorrect manager selected. Please select your correct manager.",
+                        "managers": managers,
+                    },
+                )
+
+            # ✅ Correct manager → allow login
             login(request, user)
             return redirect("dashboard")
 
         return render(
             request,
             "login.html",
-            {"form": form, "error": "Unauthorized role", "managers": managers},
+            {
+                "form": form,
+                "error": "Unauthorized role",
+                "managers": managers,
+            },
         )
 
     return render(request, "login.html", {"form": form, "managers": managers})
