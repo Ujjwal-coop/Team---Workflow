@@ -112,7 +112,7 @@ def signup_view(request):
         if role == "manager":
             ManagerProfile.objects.create(
                 user=user,
-                company_name=user.username
+                company_name=form.cleaned_data["company_name"]
             )
 
         # -------- EMPLOYEE SIGNUP --------
@@ -120,7 +120,7 @@ def signup_view(request):
             manager = form.cleaned_data["manager"]
             EmployeeProfile.objects.create(
                 user=user,
-                manager=manager
+                manager=form.cleaned_data["manager"]
             )
 
         return redirect("login")

@@ -10,10 +10,12 @@ from .models import Task, EmployeeProfile, ManagerProfile
 # =========================
 class LoginForm(forms.Form):
     username = forms.CharField(
-        widget=forms.TextInput(attrs={"class": "form-control"})
+        widget=forms.TextInput(attrs={"class": "form-control",
+            "placeholder": "Username"})
     )
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "form-control"})
+        widget=forms.PasswordInput(attrs={"class": "form-control",
+            "placeholder": "Password"})
     )
     role = forms.ChoiceField(
         choices=[
@@ -34,7 +36,8 @@ class LoginForm(forms.Form):
 # =========================
 class SignUpForm(forms.ModelForm):
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={"class": "form-control"})
+        widget=forms.PasswordInput(attrs={"class": "form-control",
+            "placeholder": "Password"})
     )
 
     role = forms.ChoiceField(
@@ -51,6 +54,15 @@ class SignUpForm(forms.ModelForm):
         widget=forms.Select(attrs={"class": "form-select"})
     )
 
+      # NEW: Company name for manager signup
+    company_name = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Company Name"
+        })
+    )
+
     class Meta:
         model = User
         fields = ["username", "password"]
@@ -59,6 +71,12 @@ class SignUpForm(forms.ModelForm):
         cleaned_data = super().clean()
         role = cleaned_data.get("role")
         manager = cleaned_data.get("manager")
+        company_name = cleaned_data.get("company_name")
+
+        if role == "manager" and not company_name:
+            raise forms.ValidationError(
+                "Company name is required for manager signup."
+            )
 
         if role == "employee" and not manager:
             raise forms.ValidationError("Employee must select a manager.")
