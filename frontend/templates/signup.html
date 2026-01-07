@@ -50,6 +50,14 @@
                    placeholder="Password"
                    required>
 
+            <!-- COMPANY NAME (MANAGER ONLY) -->
+            <div id="companyBox" class="mb-3">
+                <input type="text"
+                       name="company_name"
+                       class="form-control"
+                       placeholder="Company Name">
+            </div>
+
             <!-- MANAGER SELECTION (EMPLOYEE ONLY) -->
             <div id="managerBox" class="mb-3">
                 <label class="form-label">Select Manager</label>
@@ -83,6 +91,7 @@ function setRole(role) {
     document.getElementById("role").value = role;
 
     const managerBox = document.getElementById("managerBox");
+    const companyBox = document.getElementById("companyBox");
     const empBtn = document.getElementById("employeeBtn");
     const mgrBtn = document.getElementById("managerBtn");
 
@@ -91,9 +100,11 @@ function setRole(role) {
 
     if (role === "employee") {
         managerBox.style.display = "block";
+        companyBox.style.display = "none";
         empBtn.classList.add("active");
     } else {
         managerBox.style.display = "none";
+        companyBox.style.display = "block";
         mgrBtn.classList.add("active");
     }
 }
